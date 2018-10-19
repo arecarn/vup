@@ -81,7 +81,7 @@ def metrics(ctx):
         ctx.run(cmd.format(metric=metric, files=get_files()), **RUN_ARGS)
 
 
-@task(default=True)
+@task
 def test(ctx):
     """
     Test Task
@@ -92,7 +92,7 @@ def test(ctx):
 
 
 # pylint: disable=redefined-builtin
-@task(test, lint)
+@task(test, lint, default=True)
 def all(ctx):
     """
     All tasks minus
