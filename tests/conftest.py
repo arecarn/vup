@@ -2,17 +2,17 @@
 Contains the fixtures used by the tests
 """
 
+import os
 import pytest
 import git
-import os
 
-versions = [
+VERSIONS = [
     '1.2.3-dev',
     '1.2.3',
 ]
 
 
-@pytest.fixture(params=versions)
+@pytest.fixture(params=VERSIONS)
 def a_repo(request, tmpdir):
     """
     Create a file

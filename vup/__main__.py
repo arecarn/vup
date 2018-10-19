@@ -3,10 +3,10 @@
 The entry point when called as a module
 """
 
-from __init__ import bump
 import sys
 import argparse
-import version
+from . import version
+from . import bump
 
 
 def create_parser():
@@ -36,16 +36,16 @@ def create_parser():
     return parser
 
 
-subcmd_map = {
+SUBCMD_MAP = {
     'bump': bump,
 }
 
-parser = create_parser()
-args = parser.parse_args()
+PARSER = create_parser()
+ARGS = PARSER.parse_args()
 
 try:
-    subcmd = subcmd_map[args.subcmd]
-    subcmd(args.file, args.type)
+    SUBCMD = SUBCMD_MAP[ARGS.subcmd]
+    SUBCMD(ARGS.file, ARGS.type)
 except KeyError:
-    parser.print_help()
+    PARSER.print_help()
     sys.exit(1)
