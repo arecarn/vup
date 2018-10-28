@@ -1,4 +1,5 @@
 import re
+import os
 import semantic_version
 import git
 
@@ -12,6 +13,7 @@ def get_version_from_file(filename):
     version_from_file = re.search(REGEX, filedata).group(0)
     version = semantic_version.Version(version_from_file)
     return version
+
 
 def get_bumped_version(version, type_to_bump):
     bumped_version = None
@@ -61,8 +63,12 @@ def tag_version_file_change(repo, version):
 
 def bump(filename, type_to_bump='patch'):
     repo = git.Repo('.')
-    if repo.is_dirty():
-        assert "can't use a dirty repo"
+
+    # can't use a dirty repo
+    assert not repo.is_dirty()
+
+    # can't use a file outsize of the repo (TODO need a test for this)
+    assert not file_in_repo(repo, filename)
 
     version = get_version_from_file(filename)
     release_version = get_bumped_version(version, type_to_bump)
@@ -77,3 +83,22 @@ def bump(filename, type_to_bump='patch'):
                                filename,
                                release_version,
                                prerelease_version)
+
+
+def file_in_repo(repo, a_file):
+    '''
+    repo is a gitPython Repo object
+    a_file is the full path to the file from the repository root
+    returns True if file is found in the repo at the specified path, False
+            otherwise
+    '''
+    file_path = os.path.dirname(a_file)
+    # Build up reference to desired repo path
+    rsub = repo.head.commit.tree
+    for path_element in file_path.split(os.path.sep):
+        # If dir on file path is not in repo, neither is file.
+        try:
+            rsub = rsub[path_element]
+        except KeyError:
+            return False
+    return a_file in rsub
