@@ -68,7 +68,7 @@ def bump(filename, type_to_bump='patch'):
     assert not repo.is_dirty()
 
     # can't use a file outsize of the repo (TODO need a test for this)
-    assert not file_in_repo(repo, filename)
+    assert is_file_in_repo(repo, os.path.abspath(filename))
 
     version = get_version_from_file(filename)
     release_version = get_bumped_version(version, type_to_bump)
@@ -84,21 +84,12 @@ def bump(filename, type_to_bump='patch'):
                                release_version,
                                prerelease_version)
 
-
-def file_in_repo(repo, a_file):
+def is_file_in_repo(repo, a_file):
     '''
     repo is a gitPython Repo object
     a_file is the full path to the file from the repository root
     returns True if file is found in the repo at the specified path, False
             otherwise
     '''
-    file_path = os.path.dirname(a_file)
-    # Build up reference to desired repo path
-    rsub = repo.head.commit.tree
-    for path_element in file_path.split(os.path.sep):
-        # If dir on file path is not in repo, neither is file.
-        try:
-            rsub = rsub[path_element]
-        except KeyError:
-            return False
-    return a_file in rsub
+    relative_file = os.path.relpath(a_file, repo.working_tree_dir)
+    return relative_file in repo.head.commit.tree

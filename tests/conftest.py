@@ -12,16 +12,17 @@ VERSIONS = [
 ]
 
 class TestRepo():
-    def __init__(self, a_dir, version):
-        os.chdir(a_dir)
-        self.repo = git.Repo.init(a_dir)
-        self.version_file = os.path.join(a_dir, 'version.txt')
+    def __init__(self, a_dir, version, do_inital_commit=True):
+        self.dir = str(a_dir)
+        self.repo = git.Repo.init(self.dir)
+        self.version_file = os.path.join(self.dir, 'version.txt')
+
         with open(self.version_file, 'a') as a_file:
             a_file.write(version)
-        self.repo.index.add([self.version_file])
-        self.repo.index.commit("Initial Commit")
-        print(self.repo.index.diff(None))
-        assert not self.repo.is_dirty()
+
+        if do_inital_commit:
+            self.repo.index.add([self.version_file])
+            self.repo.index.commit("Initial Commit")
 
     def append_to_version_file(self, a_str):
         with open(self.version_file, 'a') as a_file:
@@ -33,10 +34,17 @@ def a_repo(request, tmpdir):
     """
     Create a file
     """
-    return TestRepo(tmpdir, request.param).version_file
+    test_repo = TestRepo(tmpdir, request.param)
+    return test_repo
+
 
 @pytest.fixture(params=VERSIONS)
 def a_dirty_repo(request, tmpdir):
     test_repo = TestRepo(tmpdir, request.param)
     test_repo.append_to_version_file("\ndirt")
-    return test_repo.version_file
+    return test_repo
+
+@pytest.fixture(params=VERSIONS)
+def a_repo_without_version_file_commited(request, tmpdir):
+    test_repo = TestRepo(tmpdir, request.param, do_inital_commit=False)
+    return test_repo
