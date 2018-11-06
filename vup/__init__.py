@@ -24,9 +24,8 @@ def get_bumped_version(version, type_to_bump):
     elif type_to_bump == 'patch':
         if not version.prerelease:
             bumped_version = version.next_patch()
-
     else:
-        assert 'type_to_bump is invalid'
+        assert False # 'type_to_bump is invalid'
     bumped_version.prerelease = None
     return bumped_version
 
