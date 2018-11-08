@@ -92,4 +92,14 @@ def is_file_in_repo(repo, a_file):
             otherwise
     '''
     relative_file = os.path.relpath(a_file, repo.working_tree_dir)
-    return relative_file in repo.head.commit.tree
+
+    pathdir = os.path.dirname(relative_file)
+    # Build up reference to desired repo path
+    rsub = repo.head.commit.tree
+    if pathdir != '':
+        for path_element in pathdir.split(os.path.sep):
+            try:
+                rsub = rsub[path_element]
+            except KeyError:
+                return False
+    return relative_file in rsub
