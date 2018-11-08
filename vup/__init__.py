@@ -6,14 +6,28 @@ import subprocess
 
 REGEX = r'(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patchlevel>\d+)-?(?P<special>\w+)?'
 
+class VersionFile():
+    def __init__(self, filename):
+        self.filename = filename
+        self.version = None
+        self._get_version()
 
-def get_version_from_file(filename):
-    with open(filename, 'r') as file:
-        filedata = file.read()
+    def replace_version(self, new_version):
+        filedata_to_write = re.sub(REGEX,
+                                   str(new_version),
+                                   self.filedata,
+                                   count=1)
+        with open(self.filename, 'w') as a_file:
+            a_file.write(filedata_to_write)
+        self._get_version()
 
-    version_from_file = re.search(REGEX, filedata).group(0)
-    version = semantic_version.Version(version_from_file)
-    return version
+    def _get_version(self):
+        # TODO a file without a version number
+        with open(self.filename, 'r') as a_file:
+            self.filedata = a_file.read()
+        found_version = re.search(REGEX, self.filedata).group(0)
+        self.version = semantic_version.Version(found_version)
+
 
 
 def get_bumped_version(version, type_to_bump):
@@ -35,17 +49,6 @@ def get_bumped_prerelease_version(version):
     prerelease_version = version.next_patch()
     prerelease_version.prerelease = ('beta',)
     return prerelease_version
-
-
-def replace_version_in_file(filename, old_version, new_version):
-    with open(filename, 'r') as a_file:
-        filedata = a_file.read()
-    filedata_to_write = re.sub(REGEX,
-                               str(new_version),
-                               filedata,
-                               count=1)
-    with open(filename, 'w') as a_file:
-        a_file.write(filedata_to_write)
 
 
 def commit_version_file_change(repo, filename, old_version, new_version):
@@ -73,38 +76,43 @@ def bump(filename,
          type_to_bump='patch',
          pre_bump_hook=None,
          post_bump_hook=None):
+
+    # TODO handle exceptions if git repo doesn't exist / has issues
     repo = git.Repo('.')
 
     # can't use a dirty repo
     assert not repo.is_dirty()
 
-    # can't use a file outsize of the repo (TODO need a test for this)
+    # can't use a file outside of the repo (TODO need a test for this)
     assert is_file_in_repo(repo, os.path.abspath(filename))
 
     # TODO test tag already exists
 
-    # TODO test regex only shows up once
+    # TODO assert regex only is only found once in a file
 
     if pre_bump_hook:
-        # pre_bump hook failed
-        assert run_hook(pre_bump_hook)
+        assert run_hook(pre_bump_hook) # pre_bump hook failed
 
-    version = get_version_from_file(filename)
-    release_version = get_bumped_version(version, type_to_bump)
-    replace_version_in_file(filename, version, release_version)
+    version_file = VersionFile(filename)
+
+    starting_version = version_file.version
+    release_version = get_bumped_version(version_file.version, type_to_bump)
     prerelease_version = get_bumped_prerelease_version(release_version)
 
-    commit_version_file_change(repo, filename, version, release_version)
-    tag_version_file_change(repo, version)
+    version_file.replace_version(release_version)
+    commit_version_file_change(repo,
+                               filename,
+                               starting_version,
+                               release_version)
+    tag_version_file_change(repo, version_file.version)
 
-    replace_version_in_file(filename, release_version, prerelease_version)
+    version_file.replace_version(prerelease_version)
     commit_version_file_change(repo,
                                filename,
                                release_version,
                                prerelease_version)
     if post_bump_hook:
-        # pre_bump hook failed
-        assert run_hook(post_bump_hook)
+        assert run_hook(post_bump_hook) # pre_bump hook failed
 
 
 def is_file_in_repo(repo, a_file):
@@ -118,11 +126,11 @@ def is_file_in_repo(repo, a_file):
 
     pathdir = os.path.dirname(relative_file)
     # Build up reference to desired repo path
-    rsub = repo.head.commit.tree
+    commit_tree = repo.head.commit.tree
     if pathdir != '':
         for path_element in pathdir.split(os.path.sep):
             try:
-                rsub = rsub[path_element]
+                commit_tree = commit_tree[path_element]
             except KeyError:
                 return False
-    return relative_file in rsub
+    return relative_file in commit_tree
