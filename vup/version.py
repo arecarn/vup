@@ -12,7 +12,6 @@ Given a version number MAJOR.MINOR.PATCH, increment the:
 3. PATCH version when you make backwards-compatible bug fixes
 4. Additional labels for pre-release and build metadata are available as
    extensions to the MAJOR.MINOR.PATCH format.
-   e.g. 1.0.0-alpha+001, 1.0.0+20130313144700, 1.0.0-beta+exp.sha.5114f85
 """
 
 __version__ = '0.1.0-beta'
