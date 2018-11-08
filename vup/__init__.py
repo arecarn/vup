@@ -37,13 +37,14 @@ def get_bumped_prerelease_version(version):
 
 
 def replace_version_in_file(filename, old_version, new_version):
+    with open(filename, 'r') as a_file:
+        filedata = a_file.read()
     filedata_to_write = re.sub(REGEX,
                                str(new_version),
-                               str(old_version),
+                               filedata,
                                count=1)
-
-    with open(filename, 'w') as file:
-        file.write(filedata_to_write)
+    with open(filename, 'w') as a_file:
+        a_file.write(filedata_to_write)
 
 
 def commit_version_file_change(repo, filename, old_version, new_version):
