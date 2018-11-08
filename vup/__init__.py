@@ -1,7 +1,8 @@
 import re
 import os
-import semantic_version
 import git
+import semantic_version
+import subprocess
 
 REGEX = r'(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patchlevel>\d+)-?(?P<special>\w+)?'
 
@@ -61,7 +62,17 @@ def tag_version_file_change(repo, version):
     repo.create_tag(version, message=tag_message)
 
 
-def bump(filename, type_to_bump='patch'):
+def run_hook(cmd):
+    result = subprocess.run(cmd, shell=True)
+    if result.stdout:
+        print(result.stdout)
+    return result.returncode == 0
+
+
+def bump(filename,
+         type_to_bump='patch',
+         pre_bump_hook=None,
+         post_bump_hook=None):
     repo = git.Repo('.')
 
     # can't use a dirty repo
@@ -69,6 +80,14 @@ def bump(filename, type_to_bump='patch'):
 
     # can't use a file outsize of the repo (TODO need a test for this)
     assert is_file_in_repo(repo, os.path.abspath(filename))
+
+    # TODO test tag already exists
+
+    # TODO test regex only shows up once
+
+    if pre_bump_hook:
+        # pre_bump hook failed
+        assert run_hook(pre_bump_hook)
 
     version = get_version_from_file(filename)
     release_version = get_bumped_version(version, type_to_bump)
@@ -83,6 +102,10 @@ def bump(filename, type_to_bump='patch'):
                                filename,
                                release_version,
                                prerelease_version)
+    if post_bump_hook:
+        # pre_bump hook failed
+        assert run_hook(post_bump_hook)
+
 
 def is_file_in_repo(repo, a_file):
     '''

@@ -23,3 +23,28 @@ def test_with_a_version_file_that_isnt_under_git(a_repo_without_version_file_com
     a_repo_without_version_file_commited.init(DEFAULT_VERSION)
     with pytest.raises(Exception):
         vup.bump(a_repo_without_version_file_commited.version_file, 'major')
+
+
+def test_pre_bump_hook(a_repo):
+    a_repo.init(DEFAULT_VERSION)
+    vup.bump(a_repo.version_file, 'major', 'echo success')
+
+
+def test_failed_pre_bump_hook(a_repo):
+    a_repo.init(DEFAULT_VERSION)
+    with pytest.raises(Exception):
+        vup.bump(a_repo.version_file, 'major', 'not_a_real_command')
+
+
+def test_post_bump_hook(a_repo):
+    a_repo.init(DEFAULT_VERSION)
+    vup.bump(a_repo.version_file, 'major', post_bump_hook='echo success')
+
+
+def test_failed_post_bump_hook(a_repo):
+    a_repo.init(DEFAULT_VERSION)
+    with pytest.raises(Exception):
+        vup.bump(a_repo.version_file, 'major', post_bump_hook='not_a_real_command')
+
+
+# TODO test multi line files bump
