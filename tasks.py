@@ -92,7 +92,7 @@ def test(ctx):
 
 
 # pylint: disable=redefined-builtin
-@task(test, lint, default=True)
+@task(test, reformat, lint, metrics, default=True)
 def all(ctx):
     """
     All tasks minus
