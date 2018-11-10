@@ -21,7 +21,8 @@ class VersionFile():
         self._get_version()
 
     def _get_version(self):
-        # TODO a file without a version number
+        # TODO assert file has a version number
+        # TODO assert regex only is only found once in a file
         with open(self.filename, 'r') as a_file:
             self.filedata = a_file.read()
         found_version = re.search(REGEX, self.filedata).group(0)
@@ -84,9 +85,6 @@ def bump(filename,
     # can't use a file outside of the repo (TODO need a test for this)
     assert is_file_in_repo(repo, os.path.abspath(filename))
 
-    # TODO test tag already exists
-
-    # TODO assert regex only is only found once in a file
 
     if pre_bump_hook:
         assert run_hook(pre_bump_hook)  # pre_bump hook failed
@@ -96,6 +94,9 @@ def bump(filename,
     starting_version = version_file.version
     release_version = get_bumped_version(version_file.version, type_to_bump)
     prerelease_version = get_bumped_prerelease_version(release_version)
+
+    # TODO test tag already exists
+    assert str(release_version) not in repo.tags
 
     version_file.replace_version(release_version)
     commit_version_file_change(repo, filename, starting_version,
