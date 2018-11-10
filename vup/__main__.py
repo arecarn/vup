@@ -29,14 +29,12 @@ def create_parser():
     sub_parsers = parser.add_subparsers(dest="subcmd")
 
     bump_parser = sub_parsers.add_parser('bump')
-    bump_parser.add_argument('file',
-                             help='file containing version number')
-    bump_parser.add_argument('type',
-                             help='major, minor, or patch')
-    bump_parser.add_argument('--prehook',
-                             help='script to run before bumping version')
-    bump_parser.add_argument('--posthook',
-                             help='script to run after bumping version')
+    bump_parser.add_argument('file', help='file containing version number')
+    bump_parser.add_argument('type', help='major, minor, or patch')
+    bump_parser.add_argument(
+        '--prehook', help='script to run before bumping version')
+    bump_parser.add_argument(
+        '--posthook', help='script to run after bumping version')
     return parser
 
 

@@ -6,6 +6,7 @@ import subprocess
 
 REGEX = r'(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patchlevel>\d+)-?(?P<special>\w+)?'
 
+
 class VersionFile():
     def __init__(self, filename):
         self.filename = filename
@@ -13,10 +14,8 @@ class VersionFile():
         self._get_version()
 
     def replace_version(self, new_version):
-        filedata_to_write = re.sub(REGEX,
-                                   str(new_version),
-                                   self.filedata,
-                                   count=1)
+        filedata_to_write = re.sub(
+            REGEX, str(new_version), self.filedata, count=1)
         with open(self.filename, 'w') as a_file:
             a_file.write(filedata_to_write)
         self._get_version()
@@ -29,7 +28,6 @@ class VersionFile():
         self.version = semantic_version.Version(found_version)
 
 
-
 def get_bumped_version(version, type_to_bump):
     bumped_version = None
     if type_to_bump == 'major':
@@ -40,22 +38,22 @@ def get_bumped_version(version, type_to_bump):
         if not version.prerelease:
             bumped_version = version.next_patch()
     else:
-        assert False # 'type_to_bump is invalid'
+        assert False  # 'type_to_bump is invalid'
     bumped_version.prerelease = None
     return bumped_version
 
 
 def get_bumped_prerelease_version(version):
     prerelease_version = version.next_patch()
-    prerelease_version.prerelease = ('beta',)
+    prerelease_version.prerelease = ('beta', )
     return prerelease_version
 
 
 def commit_version_file_change(repo, filename, old_version, new_version):
     repo.index.add([filename])
     commit_message = 'Increment version from {old_version} to {new_version}'
-    commit_message = commit_message.format(new_version=new_version,
-                                           old_version=old_version)
+    commit_message = commit_message.format(
+        new_version=new_version, old_version=old_version)
     print(commit_message)
     repo.index.commit(commit_message)
 
@@ -91,7 +89,7 @@ def bump(filename,
     # TODO assert regex only is only found once in a file
 
     if pre_bump_hook:
-        assert run_hook(pre_bump_hook) # pre_bump hook failed
+        assert run_hook(pre_bump_hook)  # pre_bump hook failed
 
     version_file = VersionFile(filename)
 
@@ -100,19 +98,15 @@ def bump(filename,
     prerelease_version = get_bumped_prerelease_version(release_version)
 
     version_file.replace_version(release_version)
-    commit_version_file_change(repo,
-                               filename,
-                               starting_version,
+    commit_version_file_change(repo, filename, starting_version,
                                release_version)
     tag_version_file_change(repo, version_file.version)
 
     version_file.replace_version(prerelease_version)
-    commit_version_file_change(repo,
-                               filename,
-                               release_version,
+    commit_version_file_change(repo, filename, release_version,
                                prerelease_version)
     if post_bump_hook:
-        assert run_hook(post_bump_hook) # pre_bump hook failed
+        assert run_hook(post_bump_hook)  # pre_bump hook failed
 
 
 def is_file_in_repo(repo, a_file):
