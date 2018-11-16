@@ -105,6 +105,5 @@ def build(ctx):
     """
     Task to build an executable using pyinstaller
     """
-    cmd = 'pyinstaller -n vup --onefile ' + os.path.join(
-        'vup', '__main__.py')
+    cmd = 'pyinstaller -n vup --onefile ' + os.path.join('vup', '__main__.py')
     ctx.run(cmd, **RUN_ARGS)

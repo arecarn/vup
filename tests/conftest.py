@@ -6,6 +6,7 @@ import os
 import pytest
 import git
 
+
 class TestRepo():
     def __init__(self, a_dir, do_inital_commit=True):
         self.dir = str(a_dir)
@@ -23,7 +24,6 @@ class TestRepo():
             self.repo.index.add([self.version_file])
             self.repo.index.commit("Initial Commit")
 
-
     def append_to_version_file(self, a_str):
         with open(self.version_file, 'a') as a_file:
             a_file.write(a_str)
@@ -36,6 +36,7 @@ def a_repo(tmpdir):
     """
     test_repo = TestRepo(tmpdir)
     return test_repo
+
 
 @pytest.fixture()
 def a_repo_without_version_file_commited(tmpdir):

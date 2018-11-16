@@ -82,10 +82,7 @@ def run_hook(cmd):
     return result.returncode == 0
 
 
-def bump(filename,
-         type_to_bump='patch',
-         pre_bump_hook=None,
-         post_bump_hook=None):
+def bump(filename, bump_type='patch', pre_bump_hook=None, post_bump_hook=None):
 
     # TODO handle exceptions if git repo doesn't exist / has issues
     repo = git.Repo('.')
@@ -95,7 +92,6 @@ def bump(filename,
 
     # can't use a file outside of the repo (TODO need a test for this)
     assert is_file_in_repo(repo, os.path.abspath(filename))
-
 
     if pre_bump_hook:
         assert run_hook(pre_bump_hook)  # pre_bump hook failed
