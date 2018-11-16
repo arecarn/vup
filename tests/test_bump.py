@@ -1,53 +1,74 @@
 import pytest
 import vup
 
-DEFAULT_VERSION = '1.2.3-dev'
+DEFAULT_INPUT_VERSION = '1.2.3-beta'
+DEFAULT_OUTPUT_VERSION_MAJOR = '2.0.1-beta'
+DEFAULT_OUTPUT_VERSION_MINOR = '1.3.1-beta'
+DEFAULT_OUTPUT_VERSION_PATCH = '1.2.4-beta'
 
 
-@pytest.mark.parametrize("versions", [
-    DEFAULT_VERSION,
-    '1.2.3',
-])
-def test_bump(a_repo, versions):
-    a_repo.init(versions)
+@pytest.mark.parametrize(
+    "input_version,output_version",
+    [(DEFAULT_INPUT_VERSION, DEFAULT_OUTPUT_VERSION_MAJOR),
+     ('1.2.3', '2.0.1-beta')])
+def test_bump(a_repo, input_version, output_version):
+    a_repo.init(input_version)
     vup.bump(a_repo.version_file, 'major')
+
+    version_file = vup.VersionFile(a_repo.version_file)
+    assert str(version_file.version) == output_version
 
 
 def test_dirty_bump(a_repo):
-    a_repo.init(DEFAULT_VERSION)
+    a_repo.init(DEFAULT_INPUT_VERSION)
     a_repo.append_to_version_file('modifications')
     with pytest.raises(Exception):
         vup.bump(a_repo.version_file, 'major')
 
+    version_file = vup.VersionFile(a_repo.version_file)
+    assert str(version_file.version) == DEFAULT_INPUT_VERSION + 'modifications'
+
 
 def test_with_a_version_file_that_isnt_under_git(
         a_repo_without_version_file_commited):
-    a_repo_without_version_file_commited.init(DEFAULT_VERSION)
+    a_repo_without_version_file_commited.init(DEFAULT_INPUT_VERSION)
     with pytest.raises(Exception):
         vup.bump(a_repo_without_version_file_commited.version_file, 'major')
 
 
 def test_pre_bump_hook(a_repo):
-    a_repo.init(DEFAULT_VERSION)
+    a_repo.init(DEFAULT_INPUT_VERSION)
     vup.bump(a_repo.version_file, 'major', 'echo success')
+
+    version_file = vup.VersionFile(a_repo.version_file)
+    assert str(version_file.version) == DEFAULT_OUTPUT_VERSION_MAJOR
 
 
 def test_failed_pre_bump_hook(a_repo):
-    a_repo.init(DEFAULT_VERSION)
+    a_repo.init(DEFAULT_INPUT_VERSION)
     with pytest.raises(Exception):
         vup.bump(a_repo.version_file, 'major', 'not_a_real_command')
 
+    version_file = vup.VersionFile(a_repo.version_file)
+    assert str(version_file.version) == DEFAULT_INPUT_VERSION
+
 
 def test_post_bump_hook(a_repo):
-    a_repo.init(DEFAULT_VERSION)
+    a_repo.init(DEFAULT_INPUT_VERSION)
     vup.bump(a_repo.version_file, 'major', post_bump_hook='echo success')
+
+    version_file = vup.VersionFile(a_repo.version_file)
+    assert str(version_file.version) == DEFAULT_OUTPUT_VERSION_MAJOR
 
 
 def test_failed_post_bump_hook(a_repo):
-    a_repo.init(DEFAULT_VERSION)
+    a_repo.init(DEFAULT_INPUT_VERSION)
     with pytest.raises(Exception):
         vup.bump(
             a_repo.version_file, 'major', post_bump_hook='not_a_real_command')
+
+    version_file = vup.VersionFile(a_repo.version_file)
+    assert str(version_file.version) == DEFAULT_OUTPUT_VERSION_MAJOR
 
 
 # TODO test multi line files bump

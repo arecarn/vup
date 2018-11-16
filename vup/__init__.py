@@ -19,7 +19,7 @@ REGEX = (
 
 
 class VersionFile():
-    def __init__(self, filename, is_dry_run):
+    def __init__(self, filename, is_dry_run=False):
         self.filename = filename
         self.is_dry_run = is_dry_run
         self.version = None
