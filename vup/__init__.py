@@ -1,8 +1,8 @@
 import re
 import os
+import subprocess
 import git
 import semantic_version
-import subprocess
 
 BUILD_META_DATA_REGEX = r'\+(?P<BuildMetadataTag>[\dA-Za-z-]+(\.[\dA-Za-z-]*)*)'
 
