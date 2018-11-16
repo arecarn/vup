@@ -4,7 +4,18 @@ import git
 import semantic_version
 import subprocess
 
-REGEX = r'(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patchlevel>\d+)-?(?P<special>\w+)?'
+BUILD_META_DATA_REGEX = r'\+(?P<BuildMetadataTag>[\dA-Za-z-]+(\.[\dA-Za-z-]*)*)'
+
+REGEX = (
+    r'(?P<Major>0|[1-9]\d*)\.'
+    r'(?P<Minor>0|[1-9]\d*)\.'
+    r'(?P<Patch>0|[1-9]\d*)'
+    r'(?P<PreReleaseTagWithSeparator>'
+    r'-(?P<PreReleaseTag>'
+    r'((0|[1-9]\d*|\d*[A-Z-a-z-][\dA-Za-z-]*))(\.(0|[1-9]\d*|\d*[A-Za-z-][\dA-Za-z-]*))*'
+    r')'
+    r')?'
+    r'(?P<BuildMetadataTagWithSeparator>' + BUILD_META_DATA_REGEX + r')?')
 
 
 class VersionFile():
