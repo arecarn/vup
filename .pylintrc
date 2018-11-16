@@ -1,0 +1,7 @@
+[MESSAGES CONTROL]
+
+disable=locally-disabled, duplicate-code,len-as-condition,missing-docstring
+
+[REPORTS]
+
+reports=no

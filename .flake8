@@ -1,0 +1,8 @@
+[flake8]
+ignore =
+    # line length, let pylint handle this
+    E501,
+    # line break before binary operator
+    W503,
+    # undefined name, let pylint handle this
+    F821
