@@ -46,7 +46,7 @@ ARGS = PARSER.parse_args()
 
 try:
     SUBCMD = SUBCMD_MAP[ARGS.subcmd]
-    SUBCMD(ARGS.file, ARGS.type, ARGS.prehook, ARGS.posthook)
+    SUBCMD(ARGS.file, ARGS.type, ARGS.prehook, ARGS.posthook, ARGS.is_dry_run)
 except KeyError:
     PARSER.print_help()
     sys.exit(1)
