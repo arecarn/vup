@@ -4,6 +4,8 @@ import subprocess
 import git
 import semantic_version
 
+from . import error
+
 BUILD_META_DATA_REGEX = r'\+(?P<BuildMetadataTag>[\dA-Za-z-]+(\.[\dA-Za-z-]*)*)'
 
 REGEX = (
@@ -18,6 +20,7 @@ REGEX = (
     r'(?P<BuildMetadataTagWithSeparator>' + BUILD_META_DATA_REGEX + r')?')
 
 
+# pylint: disable=too-few-public-methods
 class VersionFile():
     def __init__(self, filename, is_dry_run=False):
         self.filename = filename
@@ -34,12 +37,17 @@ class VersionFile():
         self._get_version()
 
     def _get_version(self):
-        # TODO assert file has a version number
-        # TODO assert regex only is only found once in a file
         with open(self.filename, 'r') as a_file:
             self.filedata = a_file.read()
-        found_version = re.search(REGEX, self.filedata).group(0)
-        self.version = semantic_version.Version(found_version)
+        found_versions = list(re.finditer(REGEX, self.filedata))
+        if not found_versions:
+            raise error.file_does_not_have_a_version_number(
+                'bump', self.filename)
+        if len(found_versions) != 1:
+            raise error.file_contains_multiple_version_numbers(
+                'bump', self.filename)
+        print(found_versions)
+        self.version = semantic_version.Version(found_versions[0][0])
 
 
 def get_bumped_version(version, bump_type):
@@ -52,7 +60,7 @@ def get_bumped_version(version, bump_type):
         if not version.prerelease:
             bumped_version = version.next_patch()
     else:
-        assert False  # 'bump_type is invalid'
+        raise error.bump_type_is_invalid('bump')
     bumped_version.prerelease = None
     return bumped_version
 
@@ -92,39 +100,45 @@ def run_hook(cmd, is_dry_run):
 
 def bump(files,
          bump_type='patch',
-         pre_bump_hook=None,
-         post_bump_hook=None,
+         prehook=None,
+         posthook=None,
          is_dry_run=False):
 
-    # TODO handle exceptions if git repo doesn't exist / has issues
-    repo = git.Repo('.')
+    try:
+        repo = git.Repo('.')
+    except git.exc.InvalidGitRepositoryError:
+        raise error.current_directory_is_not_a_git_repository('bump')
 
     # can't use a dirty repo
-    assert not repo.is_dirty()
+    if repo.is_dirty():
+        raise error.repository_has_uncommited_changes('bump')
 
-    # can't use a file outside of the repo (TODO need a test for this)
     version_files = set()
     current_version = None
     print(files)
 
     for a_file in files:
         print(a_file)
-        assert is_file_in_repo(repo, os.path.abspath(a_file))
+        if not is_file_in_repo(repo, os.path.abspath(a_file)):
+            raise error.file_is_not_not_under_revision_control('bump', a_file)
         version_file = VersionFile(a_file, is_dry_run)
+
         # check that all the versions match
         if current_version:
-            assert current_version == version_file.version  # version files don't match
+            if current_version != version_file.version:
+                raise error.files_dont_have_matching_versions('bump', files)
         current_version = version_file.version
         version_files.add(version_file)
 
-    if pre_bump_hook:
-        assert run_hook(pre_bump_hook, is_dry_run)  # pre_bump hook failed
+    if prehook:
+        if not run_hook(prehook, is_dry_run):
+            raise error.prehook_failed('bump', prehook)
 
     release_version = get_bumped_version(current_version, bump_type)
     prerelease_version = get_bumped_prerelease_version(release_version)
 
-    # TODO test tag already exists
-    assert str(release_version) not in repo.tags
+    if str(release_version) in repo.tags:
+        raise error.version_tag_already_exists('bump', str(release_version))
 
     for a_file in version_files:
         a_file.replace_version(release_version)
@@ -136,8 +150,9 @@ def bump(files,
         a_file.replace_version(prerelease_version)
     commit_version_changes(repo, files, release_version, prerelease_version,
                            is_dry_run)
-    if post_bump_hook:
-        assert run_hook(post_bump_hook, is_dry_run)  # pre_bump hook failed
+    if posthook:
+        if not run_hook(posthook, is_dry_run):
+            raise error.posthook_failed('bump', posthook)
 
 
 def is_file_in_repo(repo, a_file):

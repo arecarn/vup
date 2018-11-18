@@ -73,6 +73,8 @@ def test_failed_post_bump_hook(a_repo):
     assert str(version_file.version) == DEFAULT_OUTPUT_VERSION_MAJOR
 
 
+# TODO test not in a git repository
+
 # TODO test multi line files bump
 
 # TODO test multiple version files
