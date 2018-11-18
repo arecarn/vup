@@ -63,10 +63,9 @@ def get_bumped_prerelease_version(version):
     return prerelease_version
 
 
-def commit_version_file_change(repo, filename, old_version, new_version,
-                               is_dry_run):
+def commit_version_changes(repo, files, old_version, new_version, is_dry_run):
     if not is_dry_run:
-        repo.index.add([filename])
+        repo.index.add(files)
     commit_message = 'Increment version from {old_version} to {new_version}'
     commit_message = commit_message.format(
         new_version=new_version, old_version=old_version)
@@ -91,7 +90,7 @@ def run_hook(cmd, is_dry_run):
     return True
 
 
-def bump(filename,
+def bump(files,
          bump_type='patch',
          pre_bump_hook=None,
          post_bump_hook=None,
@@ -104,28 +103,39 @@ def bump(filename,
     assert not repo.is_dirty()
 
     # can't use a file outside of the repo (TODO need a test for this)
-    assert is_file_in_repo(repo, os.path.abspath(filename))
+    version_files = set()
+    current_version = None
+    print(files)
+
+    for a_file in files:
+        print(a_file)
+        assert is_file_in_repo(repo, os.path.abspath(a_file))
+        version_file = VersionFile(a_file, is_dry_run)
+        # check that all the versions match
+        if current_version:
+            assert current_version == version_file.version  # version files don't match
+        current_version = version_file.version
+        version_files.add(version_file)
 
     if pre_bump_hook:
         assert run_hook(pre_bump_hook, is_dry_run)  # pre_bump hook failed
 
-    version_file = VersionFile(filename, is_dry_run)
-
-    starting_version = version_file.version
-    release_version = get_bumped_version(version_file.version, bump_type)
+    release_version = get_bumped_version(current_version, bump_type)
     prerelease_version = get_bumped_prerelease_version(release_version)
 
     # TODO test tag already exists
     assert str(release_version) not in repo.tags
 
-    version_file.replace_version(release_version)
-    commit_version_file_change(repo, filename, starting_version,
-                               release_version, is_dry_run)
-    tag_version_file_change(repo, version_file.version, is_dry_run)
+    for a_file in version_files:
+        a_file.replace_version(release_version)
+    commit_version_changes(repo, files, current_version, release_version,
+                           is_dry_run)
+    tag_version_file_change(repo, release_version, is_dry_run)
 
-    version_file.replace_version(prerelease_version)
-    commit_version_file_change(repo, filename, release_version,
-                               prerelease_version, is_dry_run)
+    for a_file in version_files:
+        a_file.replace_version(prerelease_version)
+    commit_version_changes(repo, files, release_version, prerelease_version,
+                           is_dry_run)
     if post_bump_hook:
         assert run_hook(post_bump_hook, is_dry_run)  # pre_bump hook failed
 

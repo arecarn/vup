@@ -29,7 +29,12 @@ def create_parser():
     sub_parsers = parser.add_subparsers(dest="subcmd")
 
     bump_parser = sub_parsers.add_parser('bump')
-    bump_parser.add_argument('file', help='file containing version number')
+    bump_parser.add_argument(
+        '--version-file',
+        '-f',
+        action='append',
+        dest='version_files',
+        help='file containing version number')
     bump_parser.add_argument('type', help='major, minor, or patch')
     bump_parser.add_argument(
         '--prehook', help='script to run before bumping version')
@@ -46,7 +51,8 @@ ARGS = PARSER.parse_args()
 
 try:
     SUBCMD = SUBCMD_MAP[ARGS.subcmd]
-    SUBCMD(ARGS.file, ARGS.type, ARGS.prehook, ARGS.posthook, ARGS.is_dry_run)
+    SUBCMD(ARGS.version_files, ARGS.type, ARGS.prehook, ARGS.posthook,
+           ARGS.is_dry_run)
 except KeyError:
     PARSER.print_help()
     sys.exit(1)
