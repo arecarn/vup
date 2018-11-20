@@ -44,30 +44,27 @@ def test_pre_bump_hook(a_repo):
     assert str(version_file.version) == DEFAULT_OUTPUT_VERSION_MAJOR
 
 
-def test_failed_pre_bump_hook(a_repo):
+def test_failed_prehook(a_repo):
     a_repo.init(DEFAULT_INPUT_VERSION)
     with pytest.raises(Exception):
-        vup.bump([a_repo.version_file], 'major', 'not_a_real_command')
+        vup.bump([a_repo.version_file], 'major', prehook='not_a_real_command')
 
     version_file = vup.VersionFile(a_repo.version_file)
     assert str(version_file.version) == DEFAULT_INPUT_VERSION
 
 
-def test_post_bump_hook(a_repo):
+def test_posthook(a_repo):
     a_repo.init(DEFAULT_INPUT_VERSION)
-    vup.bump([a_repo.version_file], 'major', post_bump_hook='echo success')
+    vup.bump([a_repo.version_file], 'major', posthook='echo success')
 
     version_file = vup.VersionFile(a_repo.version_file)
     assert str(version_file.version) == DEFAULT_OUTPUT_VERSION_MAJOR
 
 
-def test_failed_post_bump_hook(a_repo):
+def test_failed_posthook(a_repo):
     a_repo.init(DEFAULT_INPUT_VERSION)
     with pytest.raises(Exception):
-        vup.bump(
-            [a_repo.version_file],
-            'major',
-            post_bump_hook='not_a_real_command')
+        vup.bump([a_repo.version_file], 'major', posthook='not_a_real_command')
 
     version_file = vup.VersionFile(a_repo.version_file)
     assert str(version_file.version) == DEFAULT_OUTPUT_VERSION_MAJOR

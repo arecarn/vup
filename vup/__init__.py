@@ -46,7 +46,6 @@ class VersionFile():
         if len(found_versions) != 1:
             raise error.file_contains_multiple_version_numbers(
                 'bump', self.filename)
-        print(found_versions)
         self.version = semantic_version.Version(found_versions[0][0])
 
 
@@ -115,10 +114,8 @@ def bump(files,
 
     version_files = set()
     current_version = None
-    print(files)
 
     for a_file in files:
-        print(a_file)
         if not is_file_in_repo(repo, os.path.abspath(a_file)):
             raise error.file_is_not_not_under_revision_control('bump', a_file)
         version_file = VersionFile(a_file, is_dry_run)
