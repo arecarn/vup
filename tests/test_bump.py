@@ -30,11 +30,17 @@ def test_dirty_bump(a_repo):
     assert str(version_file.version) == DEFAULT_INPUT_VERSION + 'modifications'
 
 
-def test_with_a_version_file_that_isnt_under_git(
-        a_repo_without_version_file_commited):
-    a_repo_without_version_file_commited.init(DEFAULT_INPUT_VERSION)
+def test_with_version_file_that_isnt_under_git(
+        repo_without_version_file_commited):
+    repo_without_version_file_commited.init(DEFAULT_INPUT_VERSION)
     with pytest.raises(vup.error.VupErrorFileIsNotNotUnderRevisionControl):
-        vup.bump([a_repo_without_version_file_commited.version_file], 'major')
+        vup.bump([repo_without_version_file_commited.version_file], 'major')
+
+
+def test_with_repo_without_commits(repo_without_commits):
+    repo_without_commits.init(DEFAULT_INPUT_VERSION)
+    with pytest.raises(vup.error.VupErrorFileIsNotNotUnderRevisionControl):
+        vup.bump([repo_without_commits.version_file], 'major')
 
 
 def test_pre_bump_hook(a_repo):

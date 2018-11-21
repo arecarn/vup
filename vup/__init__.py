@@ -166,7 +166,11 @@ def is_file_in_repo(repo, a_file):
 
     pathdir = os.path.dirname(relative_file)
     # Build up reference to desired repo path
-    commit_tree = repo.head.commit.tree
+    try:
+        commit_tree = repo.head.commit.tree
+    except ValueError:  # occurs when there are no commits in a repository
+        return False
+
     if pathdir != '':
         for path_element in pathdir.split(os.path.sep):
             try:
