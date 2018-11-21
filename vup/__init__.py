@@ -41,10 +41,10 @@ class VersionFile():
             self.filedata = a_file.read()
         found_versions = list(re.finditer(REGEX, self.filedata))
         if not found_versions:
-            raise error.file_does_not_have_a_version_number(
+            raise error.VupErrorFileDoesNotHaveAVersionNumber(
                 'bump', self.filename)
         if len(found_versions) != 1:
-            raise error.file_contains_multiple_version_numbers(
+            raise error.VupErrorFileContainsMultipleVersionNumbers(
                 'bump', self.filename)
         self.version = semantic_version.Version(found_versions[0][0])
 
@@ -59,7 +59,7 @@ def get_bumped_version(version, bump_type):
         if not version.prerelease:
             bumped_version = version.next_patch()
     else:
-        raise error.bump_type_is_invalid('bump')
+        raise error.VupErrorBumpTypeIsInvalid('bump')
     bumped_version.prerelease = None
     return bumped_version
 
@@ -106,36 +106,39 @@ def bump(files,
     try:
         repo = git.Repo('.')
     except git.exc.InvalidGitRepositoryError:
-        raise error.current_directory_is_not_a_git_repository('bump')
+        raise error.VupErrorCurrentDirectoryIsNotAGitRepository('bump')
 
     # can't use a dirty repo
     if repo.is_dirty():
-        raise error.repository_has_uncommited_changes('bump')
+        raise error.VupErrorRepositoryHasUncommitedChanges('bump')
 
     version_files = set()
     current_version = None
 
     for a_file in files:
         if not is_file_in_repo(repo, os.path.abspath(a_file)):
-            raise error.file_is_not_not_under_revision_control('bump', a_file)
+            raise error.VupErrorFileIsNotNotUnderRevisionControl(
+                'bump', a_file)
         version_file = VersionFile(a_file, is_dry_run)
 
         # check that all the versions match
         if current_version:
             if current_version != version_file.version:
-                raise error.files_dont_have_matching_versions('bump', files)
+                raise error.VupErrorFilesDontHaveMatchingVersions(
+                    'bump', files)
         current_version = version_file.version
         version_files.add(version_file)
 
     if prehook:
         if not run_hook(prehook, is_dry_run):
-            raise error.prehook_failed('bump', prehook)
+            raise error.VupErrorPrehookFailed('bump', prehook)
 
     release_version = get_bumped_version(current_version, bump_type)
     prerelease_version = get_bumped_prerelease_version(release_version)
 
     if str(release_version) in repo.tags:
-        raise error.version_tag_already_exists('bump', str(release_version))
+        raise error.VupErrorVersionTagAlreadyExists('bump',
+                                                    str(release_version))
 
     for a_file in version_files:
         a_file.replace_version(release_version)
@@ -149,7 +152,7 @@ def bump(files,
                            is_dry_run)
     if posthook:
         if not run_hook(posthook, is_dry_run):
-            raise error.posthook_failed('bump', posthook)
+            raise error.VupErrorPosthookFailed('bump', posthook)
 
 
 def is_file_in_repo(repo, a_file):

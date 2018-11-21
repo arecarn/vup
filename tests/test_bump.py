@@ -1,4 +1,5 @@
 import pytest
+import vup.error
 import vup
 
 DEFAULT_INPUT_VERSION = '1.2.3-beta'
@@ -22,7 +23,7 @@ def test_bump(a_repo, input_version, output_version):
 def test_dirty_bump(a_repo):
     a_repo.init(DEFAULT_INPUT_VERSION)
     a_repo.append_to_version_file('modifications')
-    with pytest.raises(Exception):
+    with pytest.raises(vup.error.VupErrorRepositoryHasUncommitedChanges):
         vup.bump([a_repo.version_file], 'major')
 
     version_file = vup.VersionFile(a_repo.version_file)
@@ -32,7 +33,7 @@ def test_dirty_bump(a_repo):
 def test_with_a_version_file_that_isnt_under_git(
         a_repo_without_version_file_commited):
     a_repo_without_version_file_commited.init(DEFAULT_INPUT_VERSION)
-    with pytest.raises(Exception):
+    with pytest.raises(vup.error.VupErrorFileIsNotNotUnderRevisionControl):
         vup.bump([a_repo_without_version_file_commited.version_file], 'major')
 
 
@@ -46,7 +47,7 @@ def test_pre_bump_hook(a_repo):
 
 def test_failed_prehook(a_repo):
     a_repo.init(DEFAULT_INPUT_VERSION)
-    with pytest.raises(Exception):
+    with pytest.raises(vup.error.VupErrorPrehookFailed):
         vup.bump([a_repo.version_file], 'major', prehook='not_a_real_command')
 
     version_file = vup.VersionFile(a_repo.version_file)
@@ -63,7 +64,7 @@ def test_posthook(a_repo):
 
 def test_failed_posthook(a_repo):
     a_repo.init(DEFAULT_INPUT_VERSION)
-    with pytest.raises(Exception):
+    with pytest.raises(vup.error.VupErrorPosthookFailed):
         vup.bump([a_repo.version_file], 'major', posthook='not_a_real_command')
 
     version_file = vup.VersionFile(a_repo.version_file)
