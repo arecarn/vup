@@ -6,6 +6,8 @@ import os
 import pytest
 import git
 
+# pylint: disable=invalid-name
+
 
 class TestRepo():
     def __init__(self, a_dir, do_inital_commit=True, do_version_commit=True):

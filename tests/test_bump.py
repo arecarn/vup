@@ -2,6 +2,8 @@ import pytest
 import vup.error
 import vup
 
+# pylint: disable=invalid-name
+
 DEFAULT_INPUT_VERSION = '1.2.3-beta'
 DEFAULT_OUTPUT_VERSION_MAJOR = '2.0.1-beta'
 DEFAULT_OUTPUT_VERSION_MINOR = '1.3.1-beta'

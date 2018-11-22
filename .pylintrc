@@ -1,6 +1,6 @@
 [MESSAGES CONTROL]
 
-disable=locally-disabled, duplicate-code,len-as-condition,missing-docstring
+disable=locally-disabled, duplicate-code, len-as-condition, missing-docstring, fixme
 
 [REPORTS]
 

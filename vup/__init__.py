@@ -21,6 +21,7 @@ REGEX = (
     r'(?P<BuildMetadataTagWithSeparator>' + BUILD_META_DATA_REGEX + r')?')
 
 
+# pylint: disable=too-few-public-methods
 class Config():
     def __init__(self, files, prehook, posthook):
         try:
@@ -34,7 +35,6 @@ class Config():
                     self.files = self.config['files']
                 except KeyError:
                     self.files = files
-
 
             if prehook:
                 self.prehook = prehook
@@ -136,6 +136,7 @@ def run_hook(cmd, is_dry_run):
     return True
 
 
+# pylint: disable=too-many-branches
 def bump(files,
          bump_type='patch',
          prehook=None,
