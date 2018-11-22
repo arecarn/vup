@@ -49,10 +49,10 @@ SUBCMD_MAP = {
 PARSER = create_parser()
 ARGS = PARSER.parse_args()
 
-try:
+if ARGS.subcmd in SUBCMD_MAP:
     SUBCMD = SUBCMD_MAP[ARGS.subcmd]
     SUBCMD(ARGS.version_files, ARGS.type, ARGS.prehook, ARGS.posthook,
            ARGS.is_dry_run)
-except KeyError:
+else:
     PARSER.print_help()
     sys.exit(1)
