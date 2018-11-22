@@ -30,17 +30,27 @@ class Config():
             if files:
                 self.files = files
             else:
-                self.files = self.config['files']
+                try:
+                    self.files = self.config['files']
+                except KeyError:
+                    self.files = files
+
 
             if prehook:
                 self.prehook = prehook
             else:
-                self.prehook = self.config['prehook']
+                try:
+                    self.prehook = self.config['prehook']
+                except KeyError:
+                    self.prehook = prehook
 
             if posthook:
                 self.posthook = posthook
             else:
-                self.posthook = self.config['posthook']
+                try:
+                    self.posthook = self.config['posthook']
+                except KeyError:
+                    self.posthook = posthook
 
         # TODO handle permission error permission
         except FileNotFoundError:
