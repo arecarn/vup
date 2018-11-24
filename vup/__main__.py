@@ -7,6 +7,7 @@ import sys
 import argparse
 from . import version
 from . import bump
+from . import error
 
 
 def create_parser():
@@ -50,9 +51,14 @@ PARSER = create_parser()
 ARGS = PARSER.parse_args()
 
 if ARGS.subcmd in SUBCMD_MAP:
-    SUBCMD = SUBCMD_MAP[ARGS.subcmd]
-    SUBCMD(ARGS.version_files, ARGS.type, ARGS.prehook, ARGS.posthook,
-           ARGS.is_dry_run)
+    try:
+        SUBCMD = SUBCMD_MAP[ARGS.subcmd]
+        SUBCMD(ARGS.version_files, ARGS.type, ARGS.prehook, ARGS.posthook,
+               ARGS.is_dry_run)
+    except error.VupError as err:
+        print(err, file=sys.stderr)
+        sys.exit(1)
+
 else:
     PARSER.print_help()
     sys.exit(1)
