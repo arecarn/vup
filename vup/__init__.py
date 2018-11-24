@@ -22,41 +22,34 @@ REGEX = (
 
 
 # pylint: disable=too-few-public-methods
+# pylint: disable=too-many-arguments
 class Config():
-    def __init__(self, files, prehook, posthook):
+    def __init__(self, version_files, bump_type, prehook, posthook,
+                 is_dry_run):
+
+        self.version_files = version_files
+        self.prehook = prehook
+        self.posthook = posthook
+
+        self.bump_type = bump_type
+        self.is_dry_run = is_dry_run
+
         try:
             with open('.vup.yaml') as yaml_file:
-                self.config = yaml.safe_load(yaml_file)
+                self.yaml_config = yaml.safe_load(yaml_file)
 
-            if files:
-                self.files = files
-            else:
-                try:
-                    self.files = self.config['files']
-                except KeyError:
-                    self.files = files
+                if not self.version_files:
+                    self.version_files = self.yaml_config.get(
+                        'version_files', [])
+                if not self.prehook:
+                    self.prehook = self.yaml_config.get('prehook', None)
+                if not self.posthook:
+                    self.posthook = self.yaml_config.get('posthook', None)
 
-            if prehook:
-                self.prehook = prehook
-            else:
-                try:
-                    self.prehook = self.config['prehook']
-                except KeyError:
-                    self.prehook = prehook
-
-            if posthook:
-                self.posthook = posthook
-            else:
-                try:
-                    self.posthook = self.config['posthook']
-                except KeyError:
-                    self.posthook = posthook
-
+        # TODO handle the case where version files is empty
         # TODO handle permission error permission
         except FileNotFoundError:
-            self.files = files
-            self.prehook = prehook
-            self.posthook = posthook
+            pass
 
 
 # pylint: disable=too-few-public-methods
@@ -137,13 +130,13 @@ def run_hook(cmd, is_dry_run):
 
 
 # pylint: disable=too-many-branches
-def bump(files,
+def bump(version_files,
          bump_type='patch',
          prehook=None,
          posthook=None,
          is_dry_run=False):
 
-    config = Config(files, prehook, posthook)
+    config = Config(version_files, bump_type, prehook, posthook, is_dry_run)
 
     try:
         repo = git.Repo('.')
@@ -154,10 +147,10 @@ def bump(files,
     if repo.is_dirty():
         raise error.VupErrorRepositoryHasUncommitedChanges('bump')
 
-    version_files = set()
+    version_file_set = set()
     current_version = None
 
-    for a_file in config.files:
+    for a_file in config.version_files:
         if not is_file_in_repo(repo, os.path.abspath(a_file)):
             raise error.VupErrorFileIsNotNotUnderRevisionControl(
                 'bump', a_file)
@@ -167,9 +160,9 @@ def bump(files,
         if current_version:
             if current_version != version_file.version:
                 raise error.VupErrorFilesDontHaveMatchingVersions(
-                    'bump', config.files)
+                    'bump', config.version_files)
         current_version = version_file.version
-        version_files.add(version_file)
+        version_file_set.add(version_file)
 
     if config.prehook:
         if not run_hook(config.prehook, is_dry_run):
@@ -182,15 +175,15 @@ def bump(files,
         raise error.VupErrorVersionTagAlreadyExists('bump',
                                                     str(release_version))
 
-    for a_file in version_files:
+    for a_file in version_file_set:
         a_file.replace_version(release_version)
-    commit_version_changes(repo, config.files, current_version,
+    commit_version_changes(repo, config.version_files, current_version,
                            release_version, is_dry_run)
     tag_version_file_change(repo, release_version, is_dry_run)
 
-    for a_file in version_files:
+    for a_file in version_file_set:
         a_file.replace_version(prerelease_version)
-    commit_version_changes(repo, config.files, release_version,
+    commit_version_changes(repo, config.version_files, release_version,
                            prerelease_version, is_dry_run)
     if config.posthook:
         if not run_hook(config.posthook, is_dry_run):

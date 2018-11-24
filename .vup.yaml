@@ -1,0 +1,4 @@
+---
+prehook: invoke
+version_files:
+  - vup/version.py
