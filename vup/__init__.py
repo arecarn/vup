@@ -102,6 +102,16 @@ def get_bumped_prerelease_version(version):
     return prerelease_version
 
 
+def _get_repo():
+    try:
+        repo = git.Repo('.')
+    except git.exc.InvalidGitRepositoryError:
+        raise error.VupErrorCurrentDirectoryIsNotAGitRepository('bump')
+    if repo.is_dirty():
+        raise error.VupErrorRepositoryHasUncommitedChanges('bump')
+    return repo
+
+
 def commit_version_changes(repo, files, old_version, new_version, is_dry_run):
     if not is_dry_run:
         repo.index.add(files)
@@ -138,14 +148,7 @@ def bump(version_files,
 
     config = Config(version_files, bump_type, prehook, posthook, is_dry_run)
 
-    try:
-        repo = git.Repo('.')
-    except git.exc.InvalidGitRepositoryError:
-        raise error.VupErrorCurrentDirectoryIsNotAGitRepository('bump')
-
-    # can't use a dirty repo
-    if repo.is_dirty():
-        raise error.VupErrorRepositoryHasUncommitedChanges('bump')
+    repo = _get_repo()
 
     version_file_set = set()
     current_version = None
