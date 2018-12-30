@@ -1,5 +1,6 @@
 GitPython==2.1.1
 semantic-version==2.6.0
+pyYAML>=3.13
 # development
 invoke>=0.13.0
 virtualenv>=15.0.3
@@ -7,5 +8,6 @@ pylint>=1.5.5
 pytest>=2.9.1
 pytest-cov>=2.4.0
 radon>=1.4.2
+yapf>=0.25.0
 # deployment
 setuptools>=23.1.0
