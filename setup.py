@@ -7,6 +7,11 @@ from setuptools import setup
 
 
 def _read_file_for_long_description(fname):
+    """Read a file and return its content
+
+    :param fname: name of the file to extract the long description from
+
+    """
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 

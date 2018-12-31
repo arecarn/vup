@@ -15,6 +15,13 @@ DEFAULT_OUTPUT_VERSION_PATCH = '1.2.4-beta'
     [(DEFAULT_INPUT_VERSION, DEFAULT_OUTPUT_VERSION_MAJOR),
      ('1.2.3', '2.0.1-beta')])
 def test_bump(a_repo, input_version, output_version):
+    """
+
+    :param a_repo: repository fixture to test with
+    :param input_version: starting version
+    :param output_version: version after bump
+
+    """
     a_repo.init(input_version)
     vup.bump([a_repo.version_file], 'major')
 
@@ -23,6 +30,11 @@ def test_bump(a_repo, input_version, output_version):
 
 
 def test_dirty_bump(a_repo):
+    """
+
+    :param a_repo: fixture of a test repository
+
+    """
     a_repo.init(DEFAULT_INPUT_VERSION)
     a_repo.append_to_version_file('modifications')
     with pytest.raises(vup.error.VupErrorRepositoryHasUncommitedChanges):
@@ -34,18 +46,34 @@ def test_dirty_bump(a_repo):
 
 def test_with_version_file_that_isnt_under_git(
         repo_without_version_file_commited):
+    """
+
+    :param repo_without_version_file_commited: fixture of a repository with a
+    version file that isn't committed
+
+    """
     repo_without_version_file_commited.init(DEFAULT_INPUT_VERSION)
     with pytest.raises(vup.error.VupErrorFileIsNotNotUnderRevisionControl):
         vup.bump([repo_without_version_file_commited.version_file], 'major')
 
 
 def test_with_repo_without_commits(repo_without_commits):
+    """
+
+    :param repo_without_commits: fixture of a repository without commits
+
+    """
     repo_without_commits.init(DEFAULT_INPUT_VERSION)
     with pytest.raises(vup.error.VupErrorFileIsNotNotUnderRevisionControl):
         vup.bump([repo_without_commits.version_file], 'major')
 
 
 def test_pre_bump_hook(a_repo):
+    """
+
+    :param a_repo: fixture of a test repository
+
+    """
     a_repo.init(DEFAULT_INPUT_VERSION)
     vup.bump([a_repo.version_file], 'major', 'echo success')
 
@@ -54,6 +82,11 @@ def test_pre_bump_hook(a_repo):
 
 
 def test_failed_prehook(a_repo):
+    """
+
+    :param a_repo: fixture of a test repository
+
+    """
     a_repo.init(DEFAULT_INPUT_VERSION)
     with pytest.raises(vup.error.VupErrorPrehookFailed):
         vup.bump([a_repo.version_file], 'major', prehook='not_a_real_command')
@@ -63,6 +96,11 @@ def test_failed_prehook(a_repo):
 
 
 def test_posthook(a_repo):
+    """
+
+    :param a_repo: fixture of a test repository
+
+    """
     a_repo.init(DEFAULT_INPUT_VERSION)
     vup.bump([a_repo.version_file], 'major', posthook='echo success')
 
@@ -71,6 +109,11 @@ def test_posthook(a_repo):
 
 
 def test_failed_posthook(a_repo):
+    """
+
+    :param a_repo: fixture of a test repository
+
+    """
     a_repo.init(DEFAULT_INPUT_VERSION)
     with pytest.raises(vup.error.VupErrorPosthookFailed):
         vup.bump([a_repo.version_file], 'major', posthook='not_a_real_command')

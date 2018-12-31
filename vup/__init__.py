@@ -9,6 +9,7 @@ from . import error
 
 BUILD_META_DATA_REGEX = r'\+(?P<BuildMetadataTag>[\dA-Za-z-]+(\.[\dA-Za-z-]*)*)'
 
+# TODO add tests for this regex
 REGEX = (
     r'(?P<Major>0|[1-9]\d*)\.'
     r'(?P<Minor>0|[1-9]\d*)\.'
@@ -24,6 +25,8 @@ REGEX = (
 # pylint: disable=too-few-public-methods
 # pylint: disable=too-many-arguments
 class Config():
+    """Opens and reads the YAML config file"""
+
     def __init__(self, version_files, bump_type, prehook, posthook,
                  is_dry_run):
 
@@ -54,21 +57,29 @@ class Config():
 
 # pylint: disable=too-few-public-methods
 class VersionFile():
+    """Maintains the state of the version file"""
+
     def __init__(self, filename, is_dry_run=False):
         self.filename = filename
         self.is_dry_run = is_dry_run
         self.version = None
-        self._get_version()
+        self.get_version()
 
     def replace_version(self, new_version):
+        """Replace the version in the file with a different version
+
+        :param new_version: new version to update the version in the file to
+
+        """
         filedata_to_write = re.sub(
             REGEX, str(new_version), self.filedata, count=1)
         if not self.is_dry_run:
             with open(self.filename, 'w') as a_file:
                 a_file.write(filedata_to_write)
-        self._get_version()
+        self.get_version()
 
-    def _get_version(self):
+    def get_version(self):
+        """Return the current version in the file"""
         with open(self.filename, 'r') as a_file:
             self.filedata = a_file.read()
         found_versions = list(re.finditer(REGEX, self.filedata))
@@ -82,6 +93,12 @@ class VersionFile():
 
 
 def get_bumped_version(version, bump_type):
+    """Return a new version number based on the bump type
+
+    :param version: inital version to be bumped
+    :param bump_type: The type of bump either 'major', 'minor', 'patch'
+
+    """
     bumped_version = None
     if bump_type == 'major':
         bumped_version = version.next_major()
@@ -97,12 +114,26 @@ def get_bumped_version(version, bump_type):
 
 
 def get_bumped_prerelease_version(version):
+    """Return the pre-release version of the specified version
+
+    :param version: version to get the pre-release version of
+
+    """
     prerelease_version = version.next_patch()
     prerelease_version.prerelease = ('beta', )
     return prerelease_version
 
 
 def _get_repo():
+    """Return the repo of the current directory
+
+
+    :raises VupErrorCurrentDirectoryIsNotAGitRepository: when the current
+        directory is not a git repository
+    :raises VupErrorRepositoryHasUncommitedChanges: when the repository has
+        uncommited changes
+
+    """
     try:
         repo = git.Repo('.')
     except git.exc.InvalidGitRepositoryError:
@@ -113,6 +144,17 @@ def _get_repo():
 
 
 def commit_version_changes(repo, files, old_version, new_version, is_dry_run):
+    """Adds and commits changes to a version file. The commit message.
+    This function assumes changes have already been made to the version file.
+
+    :param repo: The repo to commit to
+    :param files: files to commit
+    :param old_version: the old version before it was modified
+    :param new_version: the new version after it was modified
+    :param is_dry_run: if this function will actually make changes or just print
+    what it would do
+
+    """
     if not is_dry_run:
         repo.index.add(files)
     commit_message = 'Increment version from {old_version} to {new_version}'
@@ -124,12 +166,27 @@ def commit_version_changes(repo, files, old_version, new_version, is_dry_run):
 
 
 def tag_version_file_change(repo, version, is_dry_run):
+    """
+
+    :param repo: The repo to add the tag to
+    :param version: the version to use as the tag name
+    :param is_dry_run: if this function will actually make changes or just print
+    what it would do
+
+    """
     tag_message = 'Version {version}'.format(version=version)
     if not is_dry_run:
         repo.create_tag(version, message=tag_message)
 
 
 def run_hook(cmd, is_dry_run):
+    """
+
+    :param cmd: The command line command to run
+    :param is_dry_run: if this function will actually make changes or just print
+    what it would do
+
+    """
     print(cmd)
     if not is_dry_run:
         result = subprocess.run(cmd, shell=True)
@@ -145,6 +202,18 @@ def bump(version_files,
          prehook=None,
          posthook=None,
          is_dry_run=False):
+    """
+
+    :param version_files: The version files to bump
+    :param bump_type: The type of bump either 'major', 'minor', 'patch' (Default
+        value = 'patch')
+    :param prehook: the command to run before bumping. If this command fails the
+        bump will not be processed (Default value = None)
+    :param posthook: the command to run after bumping. (Default value = None)
+    :param is_dry_run: if this function will actually make changes or just print
+    what it would do (Default value = False)
+
+    """
 
     config = Config(version_files, bump_type, prehook, posthook, is_dry_run)
 
@@ -194,12 +263,15 @@ def bump(version_files,
 
 
 def is_file_in_repo(repo, a_file):
-    '''
-    repo is a git Python Repo object
+    """repo is a git Python Repo object
     a_file is the full path to the file from the repository root
     returns True if file is found in the repo at the specified path, False
             otherwise
-    '''
+
+    :param repo: The repo to use in the check
+    :param a_file: the file to check
+
+    """
     relative_file = os.path.relpath(a_file, repo.working_tree_dir)
 
     pathdir = os.path.dirname(relative_file)

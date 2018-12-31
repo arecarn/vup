@@ -11,9 +11,7 @@ from . import error
 
 
 def create_parser():
-    """
-    create the CLI argument parser
-    """
+    """create the CLI argument parser"""
     parser = argparse.ArgumentParser(prog='vup')
 
     parser.add_argument(

@@ -4,14 +4,19 @@ All the exceptions and their messages used by the program
 
 ERROR_HEAD = 'vup {subcmd} error: '
 
-# pylint: disable=missing-docstring
-
 
 class VupError(Exception):
-    pass
+    """Base Vup Exception. Using a base exception will
+    ensure internally generated exceptions will be caught and unexpected and
+    unhandled exceptions won't be silenced.
+
+
+    """
 
 
 class VupErrorBumpTypeIsInvalid(VupError):
+    """Thrown when the bump type specified is not valid"""
+
     def __init__(self, subcmd):
         msg = ERROR_HEAD + "bump type is invalid"
         msg = msg.format(subcmd=subcmd)
@@ -19,6 +24,12 @@ class VupErrorBumpTypeIsInvalid(VupError):
 
 
 class VupErrorRepositoryHasUncommitedChanges(VupError):
+    """Thrown when the current repository has uncommited changes that should
+    not be considered for any release.
+
+
+    """
+
     def __init__(self, subcmd):
         msg = ERROR_HEAD + "repository has uncommited changes"
         msg = msg.format(subcmd=subcmd)
@@ -26,6 +37,8 @@ class VupErrorRepositoryHasUncommitedChanges(VupError):
 
 
 class VupErrorFileIsNotNotUnderRevisionControl(VupError):
+    """Thrown when the file specified is not under any supported version control"""
+
     def __init__(self, subcmd, a_file):
         msg = ERROR_HEAD + "{a_file} is not under revision control"
         msg = msg.format(subcmd=subcmd, a_file=a_file)
@@ -33,6 +46,8 @@ class VupErrorFileIsNotNotUnderRevisionControl(VupError):
 
 
 class VupErrorCurrentDirectoryIsNotAGitRepository(VupError):
+    """Thrown when the current directory is not a git repository"""
+
     def __init__(self, subcmd):
         msg = ERROR_HEAD + "the current directory is not a Git repository"
         msg = msg.format(subcmd=subcmd)
@@ -40,6 +55,8 @@ class VupErrorCurrentDirectoryIsNotAGitRepository(VupError):
 
 
 class VupErrorFileDoesNotHaveAVersionNumber(VupError):
+    """Thrown when a file does not contain a valid version number"""
+
     def __init__(self, subcmd, a_file):
         msg = ERROR_HEAD + "{file} does not have a version number"
         msg = msg.format(subcmd=subcmd, a_file=a_file)
@@ -47,6 +64,8 @@ class VupErrorFileDoesNotHaveAVersionNumber(VupError):
 
 
 class VupErrorFileContainsMultipleVersionNumbers(VupError):
+    """Thrown when a file contains multiple version numbers"""
+
     def __init__(self, subcmd, a_file):
         msg = ERROR_HEAD + "{file} contains multiple version numbers"
         msg = msg.format(subcmd=subcmd, a_file=a_file)
@@ -54,6 +73,8 @@ class VupErrorFileContainsMultipleVersionNumbers(VupError):
 
 
 class VupErrorFilesDontHaveMatchingVersions(VupError):
+    """Thrown when a files version numbers do not match one another"""
+
     def __init__(self, subcmd, files):
         msg = ERROR_HEAD + "version numbers in {files} don't match"
         msg = msg.format(subcmd=subcmd, files=files)
@@ -61,6 +82,8 @@ class VupErrorFilesDontHaveMatchingVersions(VupError):
 
 
 class VupErrorPrehookFailed(VupError):
+    """Thrown when a pre-hook fails"""
+
     def __init__(self, subcmd, hook):
         msg = ERROR_HEAD + "prehook {hook} failed"
         msg = msg.format(subcmd=subcmd, hook=hook)
@@ -68,6 +91,8 @@ class VupErrorPrehookFailed(VupError):
 
 
 class VupErrorPosthookFailed(VupError):
+    """Thrown when a post-hook fails"""
+
     def __init__(self, subcmd, hook):
         msg = ERROR_HEAD + "posthook {hook} failed"
         msg = msg.format(subcmd=subcmd, hook=hook)
@@ -75,6 +100,8 @@ class VupErrorPosthookFailed(VupError):
 
 
 class VupErrorVersionTagAlreadyExists(VupError):
+    """Thrown when version tag already exists"""
+
     def __init__(self, subcmd, tag):
         msg = ERROR_HEAD + "tag version {tag} already exists"
         msg = msg.format(subcmd=subcmd, tag=tag)

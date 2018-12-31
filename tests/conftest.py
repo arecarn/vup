@@ -10,6 +10,8 @@ import git
 
 
 class TestRepo():
+    """Creates a repository to use for testing"""
+
     def __init__(self, a_dir, do_inital_commit=True, do_version_commit=True):
         self.dir = str(a_dir)
         self.repo = git.Repo.init(self.dir)
@@ -17,6 +19,11 @@ class TestRepo():
         self.do_version_commit = do_version_commit
 
     def init(self, version):
+        """
+
+        :param version: version string to initialize the version string to
+
+        """
         self.version_file = os.path.join(self.dir, 'version.txt')
         self.other_file = os.path.join(self.dir, 'other.txt')
         os.chdir(self.dir)
@@ -36,14 +43,21 @@ class TestRepo():
                 self.repo.index.commit("Version Commit")
 
     def append_to_version_file(self, a_str):
+        """
+
+        :param a_str: a string to append to the version file
+
+        """
         with open(self.version_file, 'a') as a_file:
             a_file.write(a_str)
 
 
 @pytest.fixture()
 def a_repo(tmpdir):
-    """
-    Create a file
+    """Fixture that with a test repository in a temporary directory
+
+    :param tmpdir: temporary directory unique to the test invocation
+
     """
     test_repo = TestRepo(tmpdir)
     return test_repo
@@ -51,11 +65,21 @@ def a_repo(tmpdir):
 
 @pytest.fixture()
 def repo_without_version_file_commited(tmpdir):
+    """
+
+    :param tmpdir: temporary directory unique to the test invocation
+
+    """
     test_repo = TestRepo(tmpdir, do_version_commit=False)
     return test_repo
 
 
 @pytest.fixture()
 def repo_without_commits(tmpdir):
+    """
+
+    :param tmpdir: temporary directory unique to the test invocation
+
+    """
     test_repo = TestRepo(tmpdir, do_inital_commit=False)
     return test_repo
