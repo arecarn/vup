@@ -65,8 +65,8 @@ def test_dirty_bump(a_repo):
         vup.bump([a_repo.version_files[0]], 'major')
 
     version_file = vup.VersionFile(a_repo.version_files[0])
-    assert (str(version_file.version)
-            == util.DEFAULT_INPUT_VERSION + 'modifications')
+    assert (str(
+        version_file.version) == util.DEFAULT_INPUT_VERSION + 'modifications')
 
 
 def test_with_version_file_that_isnt_under_git(
@@ -148,7 +148,7 @@ def test_failed_posthook(a_repo):
     assert str(version_file.version) == util.DEFAULT_OUTPUT_VERSION_MAJOR
 
 
-def test_not_in_a_git_repository(dir_without_repo):
+def test_bump_when_not_in_a_git_repository(dir_without_repo):
     """
     :param a_repo: fixture of a test repository
     """
@@ -157,7 +157,7 @@ def test_not_in_a_git_repository(dir_without_repo):
         vup.bump([dir_without_repo.version_file], 'major')
 
 
-def test_bump_type_is_invalid(a_repo):
+def test_bump_where_type_is_invalid(a_repo):
     """
     :param a_repo: fixture of a test repository
     """
@@ -166,7 +166,7 @@ def test_bump_type_is_invalid(a_repo):
         vup.bump([a_repo.version_files[0]], 'asdf')
 
 
-def test_bump_version_file_contains_multiple_version_numbers(a_repo):
+def test_bump_where_the_version_file_contains_multiple_version_numbers(a_repo):
     """
     :param a_repo: fixture of a test repository
     """
@@ -192,7 +192,7 @@ def test_bump_with_multiple_version_files(a_repo):
     assert str(version_file_2.version) == util.DEFAULT_OUTPUT_VERSION_MAJOR
 
 
-def test_bump_version_files_dont_have_matching_versions(a_repo):
+def test_bump_where_version_files_dont_have_matching_versions(a_repo):
     """
     :param a_repo: fixture of a test repository
     """
@@ -208,7 +208,7 @@ def test_bump_version_files_dont_have_matching_versions(a_repo):
         vup.bump(a_repo.version_files, 'major')
 
 
-def test_bump_repo_already_has_version_tag(a_repo):
+def test_bump_where_the_repo_already_has_version_tag(a_repo):
     """
     :param a_repo: fixture of a test repository
     """
