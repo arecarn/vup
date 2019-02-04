@@ -36,6 +36,24 @@ class VupErrorRepositoryHasUncommitedChanges(VupError):
         super().__init__(msg)
 
 
+class VupErrorNoVersionFilesProvided(VupError):
+    """Thrown when no version files have been specified"""
+
+    def __init__(self, subcmd):
+        msg = ERROR_HEAD + "no version files provided"
+        msg = msg.format(subcmd=subcmd)
+        super().__init__(msg)
+
+
+class VupErrorVersionFileDoesNotExist(VupError):
+    """Thrown when the version file does not exist"""
+
+    def __init__(self, subcmd, a_file):
+        msg = ERROR_HEAD + "version file {a_file} does not exist"
+        msg = msg.format(subcmd=subcmd, a_file=a_file)
+        super().__init__(msg)
+
+
 class VupErrorFileIsNotNotUnderRevisionControl(VupError):
     """Thrown when the file specified is not under any supported version control"""
 

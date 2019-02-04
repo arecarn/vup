@@ -63,7 +63,7 @@ class VersionFile():
         self.filename = filename
         self.is_dry_run = is_dry_run
         self.version = None
-        self.get_version()
+        self._get_version()
 
     def replace_version(self, new_version):
         """Replace the version in the file with a different version
@@ -76,10 +76,9 @@ class VersionFile():
         if not self.is_dry_run:
             with open(self.filename, 'w') as a_file:
                 a_file.write(filedata_to_write)
-        self.get_version()
+        self._get_version()
 
-    def get_version(self):
-        """Return the current version in the file"""
+    def _get_version(self):
         with open(self.filename, 'r') as a_file:
             self.filedata = a_file.read()
         found_versions = list(re.finditer(REGEX, self.filedata))
@@ -93,7 +92,7 @@ class VersionFile():
 
 
 def get_bumped_version(version, bump_type):
-    """Return a new version number based on the bump type
+    """Return a new version number based on the bump type.
 
     :param version: inital version to be bumped
     :param bump_type: The type of bump either 'major', 'minor', 'patch'
@@ -114,7 +113,7 @@ def get_bumped_version(version, bump_type):
 
 
 def get_bumped_prerelease_version(version):
-    """Return the pre-release version of the specified version
+    """Return the pre-release version of the specified version.
 
     :param version: version to get the pre-release version of
 
@@ -125,7 +124,7 @@ def get_bumped_prerelease_version(version):
 
 
 def _get_repo():
-    """Return the repo of the current directory
+    """Return the repo of the current directory.
 
 
     :raises VupErrorCurrentDirectoryIsNotAGitRepository: when the current
@@ -144,7 +143,8 @@ def _get_repo():
 
 
 def commit_version_changes(repo, files, old_version, new_version, is_dry_run):
-    """Adds and commits changes to a version file. The commit message.
+    """Add and commits changes to a version file.
+
     This function assumes changes have already been made to the version file.
 
     :param repo: The repo to commit to
@@ -152,7 +152,7 @@ def commit_version_changes(repo, files, old_version, new_version, is_dry_run):
     :param old_version: the old version before it was modified
     :param new_version: the new version after it was modified
     :param is_dry_run: if this function will actually make changes or just print
-    what it would do
+        what it would do
 
     """
     if not is_dry_run:
@@ -203,7 +203,6 @@ def bump(version_files,
          posthook=None,
          is_dry_run=False):
     """
-
     :param version_files: The version files to bump
     :param bump_type: The type of bump either 'major', 'minor', 'patch' (Default
         value = 'patch')
@@ -215,6 +214,11 @@ def bump(version_files,
 
     """
 
+    # TODO Validate bump_type
+
+    if not version_files:
+        raise error.VupErrorNoVersionFilesProvided('bump')
+
     config = Config(version_files, bump_type, prehook, posthook, is_dry_run)
 
     repo = _get_repo()
@@ -223,6 +227,9 @@ def bump(version_files,
     current_version = None
 
     for a_file in config.version_files:
+        if not os.path.isfile(a_file):
+            raise error.VupErrorVersionFileDoesNotExist('bump', a_file)
+
         if not is_file_in_repo(repo, os.path.abspath(a_file)):
             raise error.VupErrorFileIsNotNotUnderRevisionControl(
                 'bump', a_file)

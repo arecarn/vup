@@ -17,6 +17,8 @@ class TestRepo():
         self.repo = git.Repo.init(self.dir)
         self.do_inital_commit = do_inital_commit
         self.do_version_commit = do_version_commit
+        self.version_file = None
+        self.other_file = None
 
     def init(self, version):
         """
@@ -52,6 +54,19 @@ class TestRepo():
             a_file.write(a_str)
 
 
+# pylint: disable=too-few-public-methods
+class NoRepo():
+    def __init__(self, a_dir):
+        self.dir = str(a_dir)
+        self.version_file = None
+
+    def init(self, version):
+        os.chdir(self.dir)
+        self.version_file = os.path.join(self.dir, 'version.txt')
+        with open(self.version_file, 'a') as a_file:
+            a_file.write(version)
+
+
 @pytest.fixture()
 def a_repo(tmpdir):
     """Fixture that with a test repository in a temporary directory
@@ -83,3 +98,12 @@ def repo_without_commits(tmpdir):
     """
     test_repo = TestRepo(tmpdir, do_inital_commit=False)
     return test_repo
+
+
+@pytest.fixture()
+def dir_without_repo(tmpdir):
+    """
+    :param tmpdir: temporary directory unique to the test invocation
+    """
+    no_repo = NoRepo(tmpdir)
+    return no_repo

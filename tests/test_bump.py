@@ -29,6 +29,24 @@ def test_bump(a_repo, input_version, output_version):
     assert str(version_file.version) == output_version
 
 
+def test_bump_without_version_files(a_repo):
+    """
+    :param a_repo: repository fixture to test with
+    """
+    a_repo.init(DEFAULT_INPUT_VERSION)
+    with pytest.raises(vup.error.VupErrorNoVersionFilesProvided):
+        vup.bump([], 'major')
+
+
+def test_bump_with_nonexistent_version_file(a_repo):
+    """
+    :param a_repo: repository fixture to test with
+    """
+    a_repo.init(DEFAULT_INPUT_VERSION)
+    with pytest.raises(vup.error.VupErrorVersionFileDoesNotExist):
+        vup.bump(['asdf'], 'major')
+
+
 def test_dirty_bump(a_repo):
     """
 
@@ -122,7 +140,11 @@ def test_failed_posthook(a_repo):
     assert str(version_file.version) == DEFAULT_OUTPUT_VERSION_MAJOR
 
 
-# TODO test not in a git repository
+def test_not_in_a_git_repository(dir_without_repo):
+    dir_without_repo.init(DEFAULT_INPUT_VERSION)
+    with pytest.raises(vup.error.VupErrorCurrentDirectoryIsNotAGitRepository):
+        vup.bump([dir_without_repo.version_file], 'major')
+
 
 # TODO test multi line files bump
 
@@ -131,9 +153,3 @@ def test_failed_posthook(a_repo):
 # TODO test multiple version files where one does not exist
 
 # TODO test multiple version files where their version numbers don't match
-
-# TODO test multiple version files where their version numbers don't match
-
-# TODO test passing in empty list of version files
-
-# TODO test passing in empty list of version files
