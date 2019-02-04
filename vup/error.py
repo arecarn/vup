@@ -72,7 +72,7 @@ class VupErrorFileDoesNotHaveAVersionNumber(VupError):
     """Thrown when a file does not contain a valid version number"""
 
     def __init__(self, subcmd, a_file):
-        msg = ERROR_HEAD + "{file} does not have a version number"
+        msg = ERROR_HEAD + "{a_file} does not have a version number"
         msg = msg.format(subcmd=subcmd, a_file=a_file)
         super().__init__(msg)
 
@@ -81,7 +81,7 @@ class VupErrorFileContainsMultipleVersionNumbers(VupError):
     """Thrown when a file contains multiple version numbers"""
 
     def __init__(self, subcmd, a_file):
-        msg = ERROR_HEAD + "{file} contains multiple version numbers"
+        msg = ERROR_HEAD + "{a_file} contains multiple version numbers"
         msg = msg.format(subcmd=subcmd, a_file=a_file)
         super().__init__(msg)
 
