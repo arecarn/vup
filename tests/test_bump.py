@@ -1,6 +1,7 @@
 import pytest
 import vup.error
 import vup
+import util
 
 # pylint: disable=invalid-name
 
@@ -23,9 +24,9 @@ def test_bump(a_repo, input_version, output_version):
 
     """
     a_repo.init(input_version)
-    vup.bump([a_repo.version_file], 'major')
+    vup.bump([a_repo.version_files[0]], 'major')
 
-    version_file = vup.VersionFile(a_repo.version_file)
+    version_file = vup.VersionFile(a_repo.version_files[0])
     assert str(version_file.version) == output_version
 
 
@@ -54,11 +55,11 @@ def test_dirty_bump(a_repo):
 
     """
     a_repo.init(DEFAULT_INPUT_VERSION)
-    a_repo.append_to_version_file('modifications')
+    util.append_to_file(a_repo.version_files[0], 'modifications')
     with pytest.raises(vup.error.VupErrorRepositoryHasUncommitedChanges):
-        vup.bump([a_repo.version_file], 'major')
+        vup.bump([a_repo.version_files[0]], 'major')
 
-    version_file = vup.VersionFile(a_repo.version_file)
+    version_file = vup.VersionFile(a_repo.version_files[0])
     assert str(version_file.version) == DEFAULT_INPUT_VERSION + 'modifications'
 
 
@@ -72,7 +73,8 @@ def test_with_version_file_that_isnt_under_git(
     """
     repo_without_version_file_commited.init(DEFAULT_INPUT_VERSION)
     with pytest.raises(vup.error.VupErrorFileIsNotNotUnderRevisionControl):
-        vup.bump([repo_without_version_file_commited.version_file], 'major')
+        vup.bump([repo_without_version_file_commited.version_files[0]],
+                 'major')
 
 
 def test_with_repo_without_commits(repo_without_commits):
@@ -83,7 +85,7 @@ def test_with_repo_without_commits(repo_without_commits):
     """
     repo_without_commits.init(DEFAULT_INPUT_VERSION)
     with pytest.raises(vup.error.VupErrorFileIsNotNotUnderRevisionControl):
-        vup.bump([repo_without_commits.version_file], 'major')
+        vup.bump([repo_without_commits.version_files[0]], 'major')
 
 
 def test_pre_bump_hook(a_repo):
@@ -93,9 +95,9 @@ def test_pre_bump_hook(a_repo):
 
     """
     a_repo.init(DEFAULT_INPUT_VERSION)
-    vup.bump([a_repo.version_file], 'major', 'echo success')
+    vup.bump([a_repo.version_files[0]], 'major', 'echo success')
 
-    version_file = vup.VersionFile(a_repo.version_file)
+    version_file = vup.VersionFile(a_repo.version_files[0])
     assert str(version_file.version) == DEFAULT_OUTPUT_VERSION_MAJOR
 
 
@@ -107,9 +109,11 @@ def test_failed_prehook(a_repo):
     """
     a_repo.init(DEFAULT_INPUT_VERSION)
     with pytest.raises(vup.error.VupErrorPrehookFailed):
-        vup.bump([a_repo.version_file], 'major', prehook='not_a_real_command')
+        vup.bump([a_repo.version_files[0]],
+                 'major',
+                 prehook='not_a_real_command')
 
-    version_file = vup.VersionFile(a_repo.version_file)
+    version_file = vup.VersionFile(a_repo.version_files[0])
     assert str(version_file.version) == DEFAULT_INPUT_VERSION
 
 
@@ -120,9 +124,9 @@ def test_posthook(a_repo):
 
     """
     a_repo.init(DEFAULT_INPUT_VERSION)
-    vup.bump([a_repo.version_file], 'major', posthook='echo success')
+    vup.bump([a_repo.version_files[0]], 'major', posthook='echo success')
 
-    version_file = vup.VersionFile(a_repo.version_file)
+    version_file = vup.VersionFile(a_repo.version_files[0])
     assert str(version_file.version) == DEFAULT_OUTPUT_VERSION_MAJOR
 
 
@@ -134,9 +138,11 @@ def test_failed_posthook(a_repo):
     """
     a_repo.init(DEFAULT_INPUT_VERSION)
     with pytest.raises(vup.error.VupErrorPosthookFailed):
-        vup.bump([a_repo.version_file], 'major', posthook='not_a_real_command')
+        vup.bump([a_repo.version_files[0]],
+                 'major',
+                 posthook='not_a_real_command')
 
-    version_file = vup.VersionFile(a_repo.version_file)
+    version_file = vup.VersionFile(a_repo.version_files[0])
     assert str(version_file.version) == DEFAULT_OUTPUT_VERSION_MAJOR
 
 
