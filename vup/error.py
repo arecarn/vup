@@ -6,11 +6,9 @@ ERROR_HEAD = 'vup {subcmd} error: '
 
 
 class VupError(Exception):
-    """Base Vup Exception. Using a base exception will
-    ensure internally generated exceptions will be caught and unexpected and
-    unhandled exceptions won't be silenced.
-
-
+    """Base Vup Exception.
+    Using a base exception will ensure internally generated exceptions will be
+    caught and unexpected and unhandled exceptions won't be silenced.
     """
 
 
@@ -26,8 +24,6 @@ class VupErrorBumpTypeIsInvalid(VupError):
 class VupErrorRepositoryHasUncommitedChanges(VupError):
     """Thrown when the current repository has uncommited changes that should
     not be considered for any release.
-
-
     """
 
     def __init__(self, subcmd):

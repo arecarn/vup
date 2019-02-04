@@ -25,7 +25,7 @@ REGEX = (
 # pylint: disable=too-few-public-methods
 # pylint: disable=too-many-arguments
 class Config():
-    """Opens and reads the YAML config file"""
+    """Opens and reads the YAML config file."""
 
     def __init__(self, version_files, bump_type, prehook, posthook,
                  is_dry_run):
@@ -57,7 +57,7 @@ class Config():
 
 # pylint: disable=too-few-public-methods
 class VersionFile():
-    """Maintains the state of the version file"""
+    """Maintains the state of the version file."""
 
     def __init__(self, filename, is_dry_run=False):
         self.filename = filename
@@ -66,7 +66,7 @@ class VersionFile():
         self._get_version()
 
     def replace_version(self, new_version):
-        """Replace the version in the file with a different version
+        """Replace the version in the file with a different version.
 
         :param new_version: new version to update the version in the file to
 
@@ -211,7 +211,6 @@ def bump(version_files,
     :param posthook: the command to run after bumping. (Default value = None)
     :param is_dry_run: if this function will actually make changes or just print
     what it would do (Default value = False)
-
     """
 
     # TODO Validate bump_type
@@ -270,13 +269,12 @@ def bump(version_files,
 
 
 def is_file_in_repo(repo, a_file):
-    """repo is a git Python Repo object
-    a_file is the full path to the file from the repository root
-    returns True if file is found in the repo at the specified path, False
-            otherwise
+    """Check if a file is in a repo
 
-    :param repo: The repo to use in the check
-    :param a_file: the file to check
+    :param repo: The repo to use in the check :param a_file: the file to check
+    :param a_file:
+    :returns: True if file is found in the repo at the specified path, False
+        otherwise
 
     """
     relative_file = os.path.relpath(a_file, repo.working_tree_dir)
