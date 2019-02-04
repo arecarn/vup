@@ -30,6 +30,16 @@ def test_bump(a_repo, input_version, output_version):
     assert str(version_file.version) == output_version
 
 
+def test_bump_with_a_file_that_does_not_have_a_version(
+        repo_with_empty_version_files):
+    """
+    :param a_repo: repository fixture to test with
+    """
+    repo_with_empty_version_files.init(DEFAULT_INPUT_VERSION)
+    with pytest.raises(vup.error.VupErrorFileDoesNotHaveAVersionNumber):
+        vup.bump([repo_with_empty_version_files.version_files[0]], 'major')
+
+
 def test_bump_without_version_files(a_repo):
     """
     :param a_repo: repository fixture to test with
@@ -158,7 +168,6 @@ def test_bump_type_is_invalid(a_repo):
         vup.bump([a_repo.version_files[0]], 'asdf')
 
 
-# TODO test vup.error.VupErrorFileDoesNotHaveAVersionNumber
 # TODO test vup.error.VupErrorFileContainsMultipleVersionNumbers
 # TODO test vup.error.VupErrorVersionTagAlreadyExists
 # TODO test bump minor version

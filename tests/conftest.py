@@ -13,11 +13,16 @@ import git
 class TestRepo():
     """Creates a repository to use for testing"""
 
-    def __init__(self, a_dir, do_commits=True, do_version_commit=True):
+    def __init__(self,
+                 a_dir,
+                 do_commits=True,
+                 do_version_commit=True,
+                 do_write_version=True):
         self.dir = str(a_dir)
         self.repo = git.Repo.init(self.dir)
         self.do_commits = do_commits
         self.do_version_commit = do_version_commit
+        self.do_write_version = do_write_version
         self.version_files = []
         self.other_file = None
 
@@ -36,7 +41,8 @@ class TestRepo():
             self.version_files.append(os.path.join(self.dir, a_file))
             os.chdir(self.dir)
             with open(a_file, 'a') as file_handle:
-                file_handle.write(version)
+                if self.do_write_version:
+                    file_handle.write(version)
 
         if self.do_commits:
             self.repo.index.add([self.other_file])
@@ -68,6 +74,17 @@ def a_repo(tmpdir):
 
     """
     test_repo = TestRepo(tmpdir)
+    return test_repo
+
+
+@pytest.fixture()
+def repo_with_empty_version_files(tmpdir):
+    """Fixture that with a test repository in a temporary directory
+
+    :param tmpdir: temporary directory unique to the test invocation
+
+    """
+    test_repo = TestRepo(tmpdir, do_write_version=False)
     return test_repo
 
 

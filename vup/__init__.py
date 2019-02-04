@@ -49,7 +49,7 @@ class Config():
                 if not self.posthook:
                     self.posthook = self.yaml_config.get('posthook', None)
 
-        # TODO handle the case where version files is empty
+        # TODO handle the case where file is empty
         # TODO handle permission error permission
         except FileNotFoundError:
             pass
