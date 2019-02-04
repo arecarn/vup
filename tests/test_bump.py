@@ -152,10 +152,23 @@ def test_not_in_a_git_repository(dir_without_repo):
         vup.bump([dir_without_repo.version_file], 'major')
 
 
+def test_bump_type_is_invalid(a_repo):
+    a_repo.init(DEFAULT_INPUT_VERSION)
+    with pytest.raises(vup.error.VupErrorBumpTypeIsInvalid):
+        vup.bump([a_repo.version_files[0]], 'asdf')
+
+
+# TODO test vup.error.VupErrorFileDoesNotHaveAVersionNumber
+# TODO test vup.error.VupErrorFileContainsMultipleVersionNumbers
+# TODO test vup.error.VupErrorVersionTagAlreadyExists
+# TODO test bump minor version
+# TODO test bump patch version
+# TODO test bump pre-release version
+# TODO stdout of run_hook
+# TODO run_hook passing
+# TODO version file is not at the root of git repo
+# TODO using a config file
 # TODO test multi line files bump
-
 # TODO test multiple version files
-
 # TODO test multiple version files where one does not exist
-
 # TODO test multiple version files where their version numbers don't match

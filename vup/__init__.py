@@ -271,8 +271,8 @@ def bump(version_files,
 def is_file_in_repo(repo, a_file):
     """Check if a file is in a repo
 
-    :param repo: The repo to use in the check :param a_file: the file to check
-    :param a_file:
+    :param repo: The repo to use in the check
+    :param a_file: the file to check
     :returns: True if file is found in the repo at the specified path, False
         otherwise
 
@@ -286,7 +286,8 @@ def is_file_in_repo(repo, a_file):
     except ValueError:  # occurs when there are no commits in a repository
         return False
 
-    if pathdir != '':
+    file_is_in_root_dir = pathdir == ''
+    if not file_is_in_root_dir:
         for path_element in pathdir.split(os.path.sep):
             try:
                 commit_tree = commit_tree[path_element]
