@@ -69,7 +69,6 @@ class NoRepo():
 @pytest.fixture()
 def a_repo(tmpdir):
     """Fixture that with a test repository in a temporary directory
-
     :param tmpdir: temporary directory unique to the test invocation
 
     """
@@ -91,7 +90,6 @@ def repo_with_empty_version_files(tmpdir):
 @pytest.fixture()
 def repo_without_version_file_commited(tmpdir):
     """
-
     :param tmpdir: temporary directory unique to the test invocation
 
     """
